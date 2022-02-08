@@ -1,0 +1,21 @@
+{
+  "name": "agregar-lista-tickers-coins",
+  "version": "0.0.1",
+  "description": "Función para agregar Tickers/Coins a la base de datos",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "author": "Manuel Pereira",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "express": "^4.17.2",
+    "googleapis": "^95.0.0",
+    "mysql2": "^2.3.3"
+  },
+  "devDependencies": {
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.15"
+  }
+}
