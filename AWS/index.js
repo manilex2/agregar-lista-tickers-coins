@@ -17,19 +17,28 @@ const conexion = mysql.createConnection({
 exports.handler = async function (event) {
     const promise = new Promise(async function() {
         const spreadsheetId = process.env.SPREADSHEET_ID;
-        const client = await auth.getClient();
-        const googleSheet = google.sheets({ version: 'v4', auth: client });
-        const request = (await googleSheet.spreadsheets.values.get({
-            auth,
-            spreadsheetId,
-            range: `${process.env.ID_HOJA_LISTA}!A2:A`
-        })).data
-        const sql = 'INSERT INTO coinslist (ticker) VALUES ?'
-        conexion.query(sql, [request.values], function (err, resultado) {
+    const client = await auth.getClient();
+    const googleSheet = google.sheets({ version: 'v4', auth: client });
+    const request = (await googleSheet.spreadsheets.values.get({
+        auth,
+        spreadsheetId,
+        range: `${process.env.ID_HOJA_LISTA}!A2:A`
+    })).data
+    for (let i = 0; i < request.values.length; i++) {
+        var sql = `INSERT INTO ${process.env.TABLE_NAME} (name)
+        SELECT * FROM (SELECT '${request.values[i]}' AS name) AS tmp
+        WHERE NOT EXISTS (
+            SELECT name FROM ${process.env.TABLE_NAME} WHERE name = '${request.values[i]}'
+        ) LIMIT 1`
+        conexion.query(sql, function (err, resultado) {
             if (err) throw err;
             console.log(resultado);
-            conexion.end();
         });
+    }
+    await finalizarEjecucion();
+    async function finalizarEjecucion() {
+        conexion.end()
+    }
     });
     return promise
 };

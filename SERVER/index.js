@@ -29,13 +29,22 @@ app.get('/', async (req, res) => {
         spreadsheetId,
         range: `${process.env.ID_HOJA_LISTA}!A2:A`
     })).data
-    const sql = `INSERT INTO ${process.env.TABLE_NAME} (name) VALUES ?`
-    conexion.query(sql, [request.values], function (err, resultado) {
-        if (err) throw err;
-        console.log(resultado);
-        conexion.end();
-    });
-    res.send('OK');
+    for (let i = 0; i < request.values.length; i++) {
+        var sql = `INSERT INTO ${process.env.TABLE_NAME} (name)
+        SELECT * FROM (SELECT '${request.values[i]}' AS name) AS tmp
+        WHERE NOT EXISTS (
+            SELECT name FROM ${process.env.TABLE_NAME} WHERE name = '${request.values[i]}'
+        ) LIMIT 1`
+        conexion.query(sql, function (err, resultado) {
+            if (err) throw err;
+            console.log(resultado);
+        });
+    }
+    await finalizarEjecucion();
+    async function finalizarEjecucion() {
+        conexion.end()
+        res.send("Ejecutado");
+    }
 });
 
 app.listen(process.env.PORT || PUERTO, () => {
