@@ -1,0 +1,46 @@
+# serverless.yml
+
+service: agregar-lista-tickers-coins
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: us-east-2
+  stage: prod
+  environment:
+      DB_HOST: ${env:DB_HOST}
+      DB_USER: ${env:DB_USER}
+      DB_PASSWORD: ${env:DB_PASSWORD}
+      DB_PORT: ${env:DB_PORT}
+      DB_DATABASE: ${env:DB_DATABASE}
+    
+functions:
+  agregarListaTickers:
+    handler: index.handler
+    memorySize: 512
+    name: agregarListaTickers
+    description: LTF9 - Función que guarda la lista de tickers que vienen de Google Spreadsheet.
+    timeout: 180
+    maximumRetryAttempts: 0
+    environment:
+      TABLE_NAME: ${env:TABLE_NAME_TICKERS}
+      SPREADSHEET_ID: ${env:SPREADSHEET_ID_TICKERS}
+      ID_HOJA_LISTA: ${env:ID_HOJA_LISTA_TICKERS}
+    events:
+      - eventBridge:
+          schedule: cron(30 7 ? * * *)
+  agregarListaCriptos:
+    handler: index.handler
+    memorySize: 512
+    name: agregarListaCriptos
+    description: LCF1 - Función que guarda la lista de coins que vienen de Google Spreadsheet
+    timeout: 180
+    maximumRetryAttempts: 0
+    environment:
+      TABLE_NAME: ${env:TABLE_NAME_CRIPTOS}
+      SPREADSHEET_ID: ${env:SPREADSHEET_ID_CRIPTOS}
+      ID_HOJA_LISTA: ${env:ID_HOJA_LISTA_CRIPTOS}
+    events:
+      - eventBridge:
+          schedule: cron(30 7 ? * * *)
